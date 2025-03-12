@@ -12,7 +12,7 @@
 以2999与.local为例：
 
 1. 打开Cursor，在Cursor使用命令>Open User Settings并复制路径
-2. 关闭Cursor，Patch it（每次更新一次）:
+2. 关闭Cursor，Patch it（每次更新运行一次，再次运行恢复）:
    ```
    modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
    ```

@@ -6,13 +6,13 @@
 وكيل عكسي محلي. المقدمة موجزة، عن قصد.
 
 ## التثبيت
-قم بتنزيل modifier و ccursor من https://github.com/wisdgod/cursor-rp/releases، وأعد تسميتهما بالأسماء القياسية وضعهما في نفس الدليل.
+قم بتنزيل modifier و ccursor من https://github.com/wisdgod/cursor-rp/releases وأعد تسميتهما بالأسماء القياسية وضعهما في نفس الدليل.
 
 ## الإعداد والاستخدام
 باستخدام 2999 و .local كمثال:
 
 1. افتح Cursor، استخدم الأمر >Open User Settings في Cursor وانسخ المسار.
-2. أغلق Cursor، قم بتطبيق التصحيح (في كل مرة بعد التحديث):
+2. أغلق Cursor، قم بتطبيق التصحيح (قم بالتشغيل مرة واحدة بعد كل تحديث، وقم بالتشغيل مرة أخرى للاستعادة):
    ```
    modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
    ```

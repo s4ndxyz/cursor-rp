@@ -12,7 +12,7 @@ Téléchargez modifier et ccursor depuis https://github.com/wisdgod/cursor-rp/re
 En prenant 2999 et .local comme exemples:
 
 1. Ouvrez Cursor, utilisez la commande >Open User Settings dans Cursor et copiez le chemin.
-2. Fermez Cursor, appliquez le patch (à chaque mise à jour) :
+2. Fermez Cursor, appliquez le patch (exécutez une fois après chaque mise à jour, exécutez à nouveau pour restaurer) :
    ```
    modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
    ```

@@ -12,7 +12,7 @@ Descargue modifier y ccursor desde https://github.com/wisdgod/cursor-rp/releases
 Tomando 2999 y .local como ejemplos:
 
 1. Abra Cursor, use el comando >Open User Settings en Cursor y copie la ruta.
-2. Cierre Cursor, aplique el parche (cada vez después de actualizar):
+2. Cierre Cursor, aplique el parche (ejecute una vez después de cada actualización, ejecute nuevamente para restaurar):
    ```
    modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
    ```
