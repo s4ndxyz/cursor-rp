@@ -6,48 +6,90 @@
 Proxy inverse local. L'introduction est concise, intentionnellement.
 
 ## Installation
-Téléchargez modifier et ccursor depuis https://github.com/wisdgod/cursor-rp/releases, renommez-les aux noms standards et placez-les dans le même répertoire.
+1. Téléchargez modifier et ccursor depuis https://github.com/wisdgod/cursor-rp/releases
+2. Renommez-les aux noms standards et placez-les dans le même répertoire
 
 ## Configuration et utilisation
-En prenant 2999 et .local comme exemples:
+En prenant le port 3000 et .local comme exemples :
 
-1. Ouvrez Cursor, utilisez la commande >Open User Settings dans Cursor et copiez le chemin.
-2. Fermez Cursor, appliquez le patch (exécutez une fois après chaque mise à jour, exécutez à nouveau pour restaurer) :
-   ```
-   modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
-   ```
-
-3. Il pourrait modifier incorrectement le fichier hosts, vous devrez donc peut-être le mettre à jour manuellement en ajoutant ce qui suit :
-   ```
-   127.0.0.1 api2.cursor.sh.local
-   127.0.0.1 api3.cursor.sh.local
-   127.0.0.1 repo42.cursor.sh.local
-   127.0.0.1 api4.cursor.sh.local
-   127.0.0.1 us-asia.gcpp.cursor.sh.local
-   127.0.0.1 us-eu.gcpp.cursor.sh.local
-   127.0.0.1 us-only.gcpp.cursor.sh.local
+### 1. Patcher Cursor
+1. Ouvrez Cursor, exécutez la commande `Open User Settings` et notez le chemin du fichier de configuration
+2. Fermez Cursor, appliquez le patch (à réexécuter après chaque mise à jour) :
+   ```bash
+   /path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local local
    ```
 
-4. Exécuter le service :
-   ```
-   ccursor /path/to/settings.json
+**Notes spéciales** :
+- Utilisateurs Windows : Aucune attention particulière nécessaire
+- Utilisateurs macOS : Signature manuelle requise en raison du SIP (identique à Windows si SIP est désactivé)
+- Utilisateurs Linux : Nécessite de gérer le format AppImage
+- Scripts de référence : [macos.sh](macos.sh) | [linux.sh](linux.sh) (PR bienvenus)
+
+### 2. Configurer les Hosts
+Si vous utilisez le paramètre `--skip-hosts`, ajoutez manuellement ces enregistrements hosts :
+```
+127.0.0.1 api2.cursor.sh.local api3.cursor.sh.local repo42.cursor.sh.local api4.cursor.sh.local us-asia.gcpp.cursor.sh.local us-eu.gcpp.cursor.sh.local us-only.gcpp.cursor.sh.local
+```
+
+### 3. Démarrer le service
+```bash
+/path/to/ccursor
+```
+
+## Détails de configuration
+Dans `config.toml`, commentez ou supprimez les paramètres inconnus, **NE les laissez PAS vides**.
+
+Lors de la migration depuis la version 0.1.x, générez un modèle de configuration en utilisant :
+```bash
+/path/to/ccursor /path/to/settings.json
+```
+
+### Configuration de base
+| Élément | Description | Type | Requis | Par défaut | Version supportée |
+|---------|-------------|------|---------|------------|------------------|
+| `check-updates` | Vérifier les mises à jour au démarrage | bool | ❌ | false | 0.2.0+ |
+| `github-token` | Jeton d'accès GitHub | string | ❌ | "" | 0.2.0+ |
+| `current-override` | Identifiant de substitution actif | string | ✅ | - | 0.2.0+ |
+
+### Configuration du service (`service-config`)
+| Élément | Description | Type | Requis | Par défaut | Version supportée |
+|---------|-------------|------|---------|------------|------------------|
+| `port` | Port d'écoute du service | u16 | ✅ | - | Toutes versions |
+| `lock-updates` | Verrouiller les mises à jour | bool | ✅ | false | Toutes versions |
+| `domain-suffix` | Suffixe de domaine | string | ✅ | - | Toutes versions |
+| `proxy` | Configuration du serveur proxy | string | ❌ | "" | 0.2.0+ |
+| `dns-resolver` | Résolveur DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+
+### Configuration des substitutions (`overrides`)
+| Élément | Description | Type | Requis | Par défaut | Version supportée |
+|---------|-------------|------|---------|------------|------------------|
+| `token` | Jeton d'authentification JWT | string | ❌ | - | Toutes versions |
+| `traceparent` | Préserver l'identifiant de trace | bool | ❌ | false | 0.2.0+ |
+| `client-key` | Hash de la clé client | string | ❌ | - | 0.2.0+ |
+| `checksum` | Somme de contrôle combinée | string | ❌ | - | 0.2.0+ |
+| `client-version` | Numéro de version client | string | ❌ | - | 0.2.0+ |
+| `timezone` | Identifiant de fuseau horaire IANA | string | ❌ | - | Toutes versions |
+| `ghost-mode` | Paramètres du mode privé | bool | ❌ | true | 0.2.0+ |
+| `session-id` | Identifiant unique de session | string | ❌ | - | 0.2.0+ |
+
+**Notes spéciales** :
+- Les éléments marqués "0.2.0+" n'étaient pas présents dans 0.1.x, mais les éléments marqués "Toutes versions" peuvent ne pas être complètement équivalents
+- Les éléments de configuration avec des valeurs par défaut peuvent être commentés ou supprimés pour éviter des problèmes potentiels
+
+## Interfaces internes
+Les interfaces sous `/internal/` sont contrôlées par les fichiers du répertoire internal (renvoie index.html lorsque le fichier n'existe pas), sauf :
+
+1. **TokenUpdate**  
+   Mise à jour du current-override pendant l'exécution :
+   ```bash
+   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
    ```
 
-## Configurations importantes
-Ajoutez les éléments suivants dans settings.json :
-- `ccursor.port` : Ceci nécessite un entier non signé de 16 bits
-- `ccursor.lockUpdates` : Si les mises à jour doivent être verrouillées
-- `ccursor.domainSuffix` : Le .local mentionné ci-dessus
-- `ccursor.timezone` : L'identifiant de fuseau horaire de l'emplacement de votre IP (norme IANA)
-
-## Mécanisme de mise à jour
-Lorsqu'il y a des changements, utilisez des requêtes HTTP GET vers les chemins suivants :
-- `/internal/TokenUpdate`
-- `/internal/ChecksumUpdate`
-- `/internal/ConfigUpdate`
+2. **ConfigUpdate**  
+   Déclencher le rechargement après la mise à jour du fichier de configuration
 
 ---
 
-Supprimez le dépôt et partez à tout moment. Avis de non-responsabilité joint dans l'eula. Les mises à jour ne seront pas fréquentes.
+*Clause de non-responsabilité incluse dans l'EULA. Le projet peut cesser la maintenance à tout moment.*
 
 Feel free!

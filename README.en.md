@@ -6,48 +6,90 @@
 Local reverse proxy. The introduction is concise, intentionally.
 
 ## Installation
-Download modifier and ccursor from https://github.com/wisdgod/cursor-rp/releases, rename them to standard names and place them in the same directory.
+1. Download modifier and ccursor from https://github.com/wisdgod/cursor-rp/releases
+2. Rename them to standard names and place them in the same directory
 
 ## Configuration and Usage
-Taking 2999 and .local as examples:
+Taking port 3000 and .local as examples:
 
-1. Open Cursor, use the command >Open User Settings in Cursor and copy the path.
-2. Close Cursor, Patch it (run once after each update, run again to restore):
-   ```
-   modifier --cursor-path /path/to/cursor --port 2999 --suffix .local local
-   ```
-
-3. It might incorrectly modify hosts, so you may need to manually update it by adding the following:
-   ```
-   127.0.0.1 api2.cursor.sh.local
-   127.0.0.1 api3.cursor.sh.local
-   127.0.0.1 repo42.cursor.sh.local
-   127.0.0.1 api4.cursor.sh.local
-   127.0.0.1 us-asia.gcpp.cursor.sh.local
-   127.0.0.1 us-eu.gcpp.cursor.sh.local
-   127.0.0.1 us-only.gcpp.cursor.sh.local
+### 1. Patch Cursor
+1. Open Cursor, execute command `Open User Settings` and note the settings file path
+2. Close Cursor, apply patch (needs to be re-run after each update):
+   ```bash
+   /path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local local
    ```
 
-4. Run Service:
-   ```
-   ccursor /path/to/settings.json
+**Special Notes**:
+- Windows users: No special attention needed
+- macOS users: Manual signing required due to SIP (same as Windows if SIP is disabled)
+- Linux users: Need to handle AppImage format
+- Reference scripts: [macos.sh](macos.sh) | [linux.sh](linux.sh) (PRs welcome)
+
+### 2. Configure Hosts
+If using `--skip-hosts` parameter, manually add these host records:
+```
+127.0.0.1 api2.cursor.sh.local api3.cursor.sh.local repo42.cursor.sh.local api4.cursor.sh.local us-asia.gcpp.cursor.sh.local us-eu.gcpp.cursor.sh.local us-only.gcpp.cursor.sh.local
+```
+
+### 3. Start Service
+```bash
+/path/to/ccursor
+```
+
+## Configuration Details
+In `config.toml`, comment out or delete unknown parameters, **DO NOT leave them empty**.
+
+When migrating from version 0.1.x, generate a config template using:
+```bash
+/path/to/ccursor /path/to/settings.json
+```
+
+### Basic Configuration
+| Item | Description | Type | Required | Default | Supported Version |
+|------|-------------|------|----------|---------|------------------|
+| `check-updates` | Check updates on startup | bool | ❌ | false | 0.2.0+ |
+| `github-token` | GitHub access token | string | ❌ | "" | 0.2.0+ |
+| `current-override` | Current active override identifier | string | ✅ | - | 0.2.0+ |
+
+### Service Configuration (`service-config`)
+| Item | Description | Type | Required | Default | Supported Version |
+|------|-------------|------|----------|---------|------------------|
+| `port` | Service listening port | u16 | ✅ | - | All versions |
+| `lock-updates` | Lock updates | bool | ✅ | false | All versions |
+| `domain-suffix` | Domain suffix | string | ✅ | - | All versions |
+| `proxy` | Proxy server configuration | string | ❌ | "" | 0.2.0+ |
+| `dns-resolver` | DNS resolver (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+
+### Override Configuration (`overrides`)
+| Item | Description | Type | Required | Default | Supported Version |
+|------|-------------|------|----------|---------|------------------|
+| `token` | JWT authentication token | string | ❌ | - | All versions |
+| `traceparent` | Preserve trace identifier | bool | ❌ | false | 0.2.0+ |
+| `client-key` | Client key hash | string | ❌ | - | 0.2.0+ |
+| `checksum` | Combined hash checksum | string | ❌ | - | 0.2.0+ |
+| `client-version` | Client version number | string | ❌ | - | 0.2.0+ |
+| `timezone` | IANA timezone identifier | string | ❌ | - | All versions |
+| `ghost-mode` | Privacy mode settings | bool | ❌ | true | 0.2.0+ |
+| `session-id` | Session unique identifier | string | ❌ | - | 0.2.0+ |
+
+**Special Notes**:
+- Items marked "0.2.0+" were not present in 0.1.x, but items marked "All versions" may not be completely equivalent
+- Configuration items with default values can be commented out or deleted to avoid potential issues
+
+## Internal Interfaces
+Interfaces under `/internal/` are controlled by files in the internal directory (returns index.html when file doesn't exist), except:
+
+1. **TokenUpdate**  
+   Update current-override at runtime:
+   ```bash
+   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
    ```
 
-## Important Configurations
-Add the following items in settings.json:
-- `ccursor.port`: This requires a 16-bit unsigned integer
-- `ccursor.lockUpdates`: Whether to lock updates
-- `ccursor.domainSuffix`: The .local mentioned above
-- `ccursor.timezone`: The timezone identifier of your IP location (IANA standard)
-
-## Update Mechanism
-When there are any changes, use HTTP GET requests to the following paths:
-- `/internal/TokenUpdate`
-- `/internal/ChecksumUpdate`
-- `/internal/ConfigUpdate`
+2. **ConfigUpdate**  
+   Trigger reload after configuration file update
 
 ---
 
-Delete the repository and run away at any time. Disclaimer attached in the eula. Updates will not be frequent.
+*Disclaimer included in EULA. Project may terminate maintenance at any time.*
 
 Feel free!
