@@ -49,6 +49,7 @@ Al migrar desde la versión 0.1.x, genere una plantilla de configuración usando
 |----------|-------------|------|------------|-------------|-------------------|
 | `check-updates` | Verificar actualizaciones al inicio | bool | ❌ | false | 0.2.0+ |
 | `github-token` | Token de acceso GitHub | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | Estadísticas de uso del modelo | bool | ❌ | true | 0.2.1+ |
 | `current-override` | Identificador de anulación activo | string | ✅ | - | 0.2.0+ |
 
 ### Configuración del servicio (`service-config`)
@@ -59,6 +60,8 @@ Al migrar desde la versión 0.1.x, genere una plantilla de configuración usando
 | `domain-suffix` | Sufijo de dominio | string | ✅ | - | Todas las versiones |
 | `proxy` | Configuración del servidor proxy | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | Resolvedor DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | Configuración de correo electrónico falso | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | Configuración de dirección de servicio | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### Configuración de anulaciones (`overrides`)
 | Elemento | Descripción | Tipo | Requerido | Por defecto | Versión soportada |
@@ -79,14 +82,17 @@ Al migrar desde la versión 0.1.x, genere una plantilla de configuración usando
 ## Interfaces internas
 Las interfaces bajo `/internal/` son controladas por archivos en el directorio internal (devuelve index.html cuando el archivo no existe), excepto:
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    Actualizar current-override en tiempo de ejecución:
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
-2. **ConfigUpdate**  
+2. **ConfigUpdate**
    Activar recarga después de actualizar el archivo de configuración
+
+3. **GetUsage**
+   Obtener estadísticas de uso del modelo
 
 ---
 

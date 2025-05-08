@@ -49,6 +49,7 @@
 |----------|----------|-----|--------------|---------------|---------------------|
 | `check-updates` | Проверка обновлений при запуске | bool | ❌ | false | 0.2.0+ |
 | `github-token` | Токен доступа GitHub | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | Статистика использования модели | bool | ❌ | true | 0.2.1+ |
 | `current-override` | Текущий активный идентификатор переопределения | string | ✅ | - | 0.2.0+ |
 
 ### Конфигурация сервиса (`service-config`)
@@ -59,6 +60,8 @@
 | `domain-suffix` | Суффикс домена | string | ✅ | - | Все версии |
 | `proxy` | Конфигурация прокси-сервера | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | DNS резолвер (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | Конфигурация поддельной электронной почты | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | Конфигурация адреса сервиса | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### Конфигурация переопределений (`overrides`)
 | Параметр | Описание | Тип | Обязательно | По умолчанию | Поддерживаемая версия |
@@ -79,14 +82,17 @@
 ## Внутренние интерфейсы
 Интерфейсы в `/internal/` контролируются файлами в директории internal (возвращает index.html, когда файл не существует), за исключением:
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    Обновление current-override во время выполнения:
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
-2. **ConfigUpdate**  
+2. **ConfigUpdate**
    Запуск перезагрузки после обновления файла конфигурации
+
+3. **GetUsage**
+   Получение статистики использования модели
 
 ---
 

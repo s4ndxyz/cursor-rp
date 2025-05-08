@@ -49,6 +49,7 @@ When migrating from version 0.1.x, generate a config template using:
 |------|-------------|------|----------|---------|------------------|
 | `check-updates` | Check updates on startup | bool | ❌ | false | 0.2.0+ |
 | `github-token` | GitHub access token | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | Model usage statistics | bool | ❌ | true | 0.2.1+ |
 | `current-override` | Current active override identifier | string | ✅ | - | 0.2.0+ |
 
 ### Service Configuration (`service-config`)
@@ -59,6 +60,8 @@ When migrating from version 0.1.x, generate a config template using:
 | `domain-suffix` | Domain suffix | string | ✅ | - | All versions |
 | `proxy` | Proxy server configuration | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | DNS resolver (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | Fake email configuration | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | Service address configuration | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### Override Configuration (`overrides`)
 | Item | Description | Type | Required | Default | Supported Version |
@@ -79,14 +82,17 @@ When migrating from version 0.1.x, generate a config template using:
 ## Internal Interfaces
 Interfaces under `/internal/` are controlled by files in the internal directory (returns index.html when file doesn't exist), except:
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    Update current-override at runtime:
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
-2. **ConfigUpdate**  
+2. **ConfigUpdate**
    Trigger reload after configuration file update
+
+3. **GetUsage**
+   Get model usage statistics
 
 ---
 

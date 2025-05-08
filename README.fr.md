@@ -49,6 +49,7 @@ Lors de la migration depuis la version 0.1.x, générez un modèle de configurat
 |---------|-------------|------|---------|------------|------------------|
 | `check-updates` | Vérifier les mises à jour au démarrage | bool | ❌ | false | 0.2.0+ |
 | `github-token` | Jeton d'accès GitHub | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | Statistiques d'utilisation du modèle | bool | ❌ | true | 0.2.1+ |
 | `current-override` | Identifiant de substitution actif | string | ✅ | - | 0.2.0+ |
 
 ### Configuration du service (`service-config`)
@@ -59,6 +60,8 @@ Lors de la migration depuis la version 0.1.x, générez un modèle de configurat
 | `domain-suffix` | Suffixe de domaine | string | ✅ | - | Toutes versions |
 | `proxy` | Configuration du serveur proxy | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | Résolveur DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | Configuration d'e-mail fictif | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | Configuration d'adresse de service | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### Configuration des substitutions (`overrides`)
 | Élément | Description | Type | Requis | Par défaut | Version supportée |
@@ -79,14 +82,17 @@ Lors de la migration depuis la version 0.1.x, générez un modèle de configurat
 ## Interfaces internes
 Les interfaces sous `/internal/` sont contrôlées par les fichiers du répertoire internal (renvoie index.html lorsque le fichier n'existe pas), sauf :
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    Mise à jour du current-override pendant l'exécution :
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
-2. **ConfigUpdate**  
+2. **ConfigUpdate**
    Déclencher le rechargement après la mise à jour du fichier de configuration
+
+3. **GetUsage**
+   Obtenir les statistiques d'utilisation du modèle
 
 ---
 

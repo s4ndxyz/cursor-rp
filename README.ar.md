@@ -49,6 +49,7 @@
 |--------|--------|-------|--------|-------------------|-----------------|
 | `check-updates` | التحقق من التحديثات عند بدء التشغيل | bool | ❌ | false | 0.2.0+ |
 | `github-token` | رمز وصول GitHub | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | إحصائيات استخدام النموذج | bool | ❌ | true | 0.2.1+ |
 | `current-override` | معرف التجاوز النشط | string | ✅ | - | 0.2.0+ |
 
 ### إعداد الخدمة (`service-config`)
@@ -59,6 +60,8 @@
 | `domain-suffix` | لاحقة النطاق | string | ✅ | - | جميع الإصدارات |
 | `proxy` | إعداد خادم الوكيل | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | محلل DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | إعداد البريد الإلكتروني الوهمي | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | إعداد عنوان الخدمة | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### إعداد التجاوزات (`overrides`)
 | العنصر | الوصف | النوع | مطلوب | القيمة الافتراضية | الإصدار المدعوم |
@@ -79,14 +82,17 @@
 ## الواجهات الداخلية
 الواجهات تحت `/internal/` يتم التحكم فيها بواسطة الملفات في دليل internal (يعيد index.html عندما لا يوجد الملف)، باستثناء:
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    تحديث current-override في وقت التشغيل:
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
-2. **ConfigUpdate**  
+2. **ConfigUpdate**
    تفعيل إعادة التحميل بعد تحديث ملف الإعداد
+
+3. **GetUsage**
+   الحصول على إحصائيات استخدام النموذج
 
 ---
 

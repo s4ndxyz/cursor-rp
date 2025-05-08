@@ -49,6 +49,7 @@
 |--------|------|------|------|--------|----------|
 | `check-updates` | 启动时检查更新 | bool | ❌ | false | 0.2.0+ |
 | `github-token` | GitHub访问令牌 | string | ❌ | "" | 0.2.0+ |
+| `usage-statistics` | 模型使用统计 | bool | ❌ | true | 0.2.1+ |
 | `current-override` | 当前生效的覆盖配置标识 | string | ✅ | - | 0.2.0+ |
 
 ### 服务配置(`service-config`)
@@ -59,6 +60,8 @@
 | `domain-suffix` | 域名后缀 | string | ✅ | - | 所有版本 |
 | `proxy` | 代理服务器配置 | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | DNS解析器(gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
+| `fake-email` | 虚假电子邮件配置 | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
+| `service-addr` | 服务地址配置 | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
 
 ### 覆盖配置(`overrides`)
 | 配置项 | 说明 | 类型 | 必需 | 默认值 | 支持版本 |
@@ -79,14 +82,17 @@
 ## 内部接口
 `/internal/` 路径下的接口由 internal 目录文件控制（文件不存在时返回 index.html），除外：
 
-1. **TokenUpdate**  
+1. **TokenUpdate**
    运行时更新 current-override：
    ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate -d '${KEY_NAME}'
+   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
    ```
 
 2. **ConfigUpdate**  
    配置文件更新后触发重载
+
+3. **GetUsage**  
+   获取模型使用统计
 
 ---
 
