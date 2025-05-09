@@ -80,19 +80,45 @@ Al migrar desde la versión 0.1.x, genere una plantilla de configuración usando
 - Los elementos de configuración con valores predeterminados pueden comentarse o eliminarse para evitar problemas potenciales
 
 ## Interfaces internas
-Las interfaces bajo `/internal/` son controladas por archivos en el directorio internal (devuelve index.html cuando el archivo no existe), excepto:
+Las interfaces bajo `/internal/` son controladas por archivos en el directorio internal (devuelve index.html cuando el archivo no existe), excepto las siguientes interfaces específicas:
 
-1. **TokenUpdate**
-   Actualizar current-override en tiempo de ejecución:
-   ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
-   ```
+### 1. TokenUpdate
+**Función**: Actualizar el elemento de configuración current-override en tiempo de ejecución
+**Parámetros**:
+| Parámetro | Requerido | Descripción |
+|-----------|-----------|-------------|
+| key | ✅ | Identificador de configuración de anulación |
 
-2. **ConfigUpdate**
-   Activar recarga después de actualizar el archivo de configuración
+**Ejemplo**:
+```bash
+curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
+```
 
-3. **GetUsage**
-   Obtener estadísticas de uso del modelo
+### 2. TokenAdd
+**Función**: Obtener URL de autorización y tiempo de espera
+**Retorna**: `["url",100]`, donde url es el enlace de autorización y 100 es el tiempo de espera en segundos
+
+**Parámetros**:
+| Parámetro | Requerido | Descripción |
+|-----------|-----------|-------------|
+| timezone | ✅ | Identificador de zona horaria IANA (p.ej., "Asia/Shanghai" o "America/Los_Angeles") |
+| wait | ❌ | Tiempo de espera en segundos, por defecto 100 |
+| client_version | ❌ | Número de versión del cliente, por defecto 0.49.6 |
+
+**Ejemplo**:
+```bash
+# Uso básico
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai
+
+# Tiempo de espera personalizado
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai&wait=50
+```
+
+### 3. ConfigUpdate
+**Función**: Activar recarga del servicio después de actualizar el archivo de configuración
+
+### 4. GetUsage
+**Función**: Obtener estadísticas de uso del modelo
 
 ---
 

@@ -80,19 +80,45 @@ Lors de la migration depuis la version 0.1.x, générez un modèle de configurat
 - Les éléments de configuration avec des valeurs par défaut peuvent être commentés ou supprimés pour éviter des problèmes potentiels
 
 ## Interfaces internes
-Les interfaces sous `/internal/` sont contrôlées par les fichiers du répertoire internal (renvoie index.html lorsque le fichier n'existe pas), sauf :
+Les interfaces sous `/internal/` sont contrôlées par les fichiers du répertoire internal (renvoie index.html lorsque le fichier n'existe pas), à l'exception des interfaces spécifiques suivantes :
 
-1. **TokenUpdate**
-   Mise à jour du current-override pendant l'exécution :
-   ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
-   ```
+### 1. TokenUpdate
+**Fonction** : Mise à jour du paramètre current-override pendant l'exécution
+**Paramètres** :
+| Paramètre | Requis | Description |
+|-----------|--------|-------------|
+| key | ✅ | Identifiant de configuration de substitution |
 
-2. **ConfigUpdate**
-   Déclencher le rechargement après la mise à jour du fichier de configuration
+**Exemple** :
+```bash
+curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
+```
 
-3. **GetUsage**
-   Obtenir les statistiques d'utilisation du modèle
+### 2. TokenAdd
+**Fonction** : Obtenir l'URL d'autorisation et le temps d'attente
+**Retourne** : `["url",100]`, où url est le lien d'autorisation et 100 est le temps d'attente en secondes
+
+**Paramètres** :
+| Paramètre | Requis | Description |
+|-----------|--------|-------------|
+| timezone | ✅ | Identifiant de fuseau horaire IANA (par exemple, "Asia/Shanghai" ou "America/Los_Angeles") |
+| wait | ❌ | Temps d'attente en secondes, par défaut 100 |
+| client_version | ❌ | Numéro de version client, par défaut 0.49.6 |
+
+**Exemple** :
+```bash
+# Utilisation de base
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai
+
+# Temps d'attente personnalisé
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai&wait=50
+```
+
+### 3. ConfigUpdate
+**Fonction** : Déclencher le rechargement du service après la mise à jour du fichier de configuration
+
+### 4. GetUsage
+**Fonction** : Obtenir les statistiques d'utilisation du modèle
 
 ---
 

@@ -80,19 +80,45 @@ When migrating from version 0.1.x, generate a config template using:
 - Configuration items with default values can be commented out or deleted to avoid potential issues
 
 ## Internal Interfaces
-Interfaces under `/internal/` are controlled by files in the internal directory (returns index.html when file doesn't exist), except:
+Interfaces under `/internal/` are controlled by files in the internal directory (returns index.html when file doesn't exist), except for the following specific interfaces:
 
-1. **TokenUpdate**
-   Update current-override at runtime:
-   ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
-   ```
+### 1. TokenUpdate
+**Function**: Update current-override configuration item at runtime
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| key | ✅ | Override configuration identifier |
 
-2. **ConfigUpdate**
-   Trigger reload after configuration file update
+**Example**:
+```bash
+curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
+```
 
-3. **GetUsage**
-   Get model usage statistics
+### 2. TokenAdd
+**Function**: Get authorization URL and wait time
+**Return**: `["url",100]`, where url is the authorization link and 100 is the waiting time in seconds
+
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| timezone | ✅ | IANA timezone identifier (e.g., "Asia/Shanghai" or "America/Los_Angeles") |
+| wait | ❌ | Wait time in seconds, default 100 |
+| client_version | ❌ | Client version number, default 0.49.6 |
+
+**Example**:
+```bash
+# Basic usage
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai
+
+# Custom wait time
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai&wait=50
+```
+
+### 3. ConfigUpdate
+**Function**: Trigger service reload after configuration file update
+
+### 4. GetUsage
+**Function**: Get model usage statistics
 
 ---
 

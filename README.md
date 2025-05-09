@@ -80,19 +80,45 @@
 - 建议保留默认值的配置项可注释或删除，避免潜在问题
 
 ## 内部接口
-`/internal/` 路径下的接口由 internal 目录文件控制（文件不存在时返回 index.html），除外：
+`/internal/` 路径下的接口由 internal 目录文件控制（文件不存在时返回 index.html），除非使用以下特定接口：
 
-1. **TokenUpdate**
-   运行时更新 current-override：
-   ```bash
-   curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
-   ```
+### 1. TokenUpdate
+**功能**：运行时更新 current-override 配置项
+**参数**：
+| 参数名 | 必需 | 说明 |
+|--------|------|------|
+| key | ✅ | 覆盖配置标识 |
 
-2. **ConfigUpdate**  
-   配置文件更新后触发重载
+**示例**：
+```bash
+curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
+```
 
-3. **GetUsage**  
-   获取模型使用统计
+### 2. TokenAdd
+**功能**：获取授权URL和等待时间
+**返回**：`["url",100]`，其中url为授权链接，100为等待秒数
+
+**参数**：
+| 参数名 | 必需 | 说明 |
+|--------|------|------|
+| timezone | ✅ | IANA时区标识（如"Asia/Shanghai"或"America/Los_Angeles"） |
+| wait | ❌ | 等待秒数，默认100 |
+| client_version | ❌ | 客户端版本号，默认0.49.6 |
+
+**示例**：
+```bash
+# 基本用法
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai
+
+# 自定义等待时间
+curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai&wait=50
+```
+
+### 3. ConfigUpdate
+**功能**：配置文件更新后触发服务重载
+
+### 4. GetUsage
+**功能**：获取模型使用统计数据
 
 ---
 
