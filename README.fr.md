@@ -6,24 +6,51 @@
 Proxy inverse local. L'introduction est concise, intentionnellement.
 
 ## Installation
-1. Téléchargez modifier et ccursor depuis https://github.com/wisdgod/cursor-rp/releases
+1. Téléchargez modifier et ccursor depuis https://github.com/[NAME]/cursor-rp/releases
 2. Renommez-les aux noms standards et placez-les dans le même répertoire
 
 ## Configuration et utilisation
-En prenant le port 3000 et .local comme exemples :
 
 ### 1. Patcher Cursor
 1. Ouvrez Cursor, exécutez la commande `Open User Settings` et notez le chemin du fichier de configuration
 2. Fermez Cursor, appliquez le patch (à réexécuter après chaque mise à jour) :
    ```bash
-   /path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local local
+   # Utilisation basique (détection automatique du chemin Cursor)
+   /path/to/modifier --port 3000 --suffix .local
+ 
+   # Spécifier le chemin Cursor
+   /path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local
+ 
+   # Configuration HTTPS
+   /path/to/modifier --scheme https --port 443 --suffix .example.com
+ 
+   # Ignorer la détection des hosts (gestion manuelle des hosts)
+   /path/to/modifier --port 3000 --suffix .local --skip-hosts
+ 
+   # Sauvegarder la commande pour réutilisation
+   /path/to/modifier --port 3000 --suffix .local --save-command modifier.cmd
    ```
 
-**Notes spéciales** :
-- Utilisateurs Windows : Aucune attention particulière nécessaire
-- Utilisateurs macOS : Signature manuelle requise en raison du SIP (identique à Windows si SIP est désactivé)
-- Utilisateurs Linux : Nécessite de gérer le format AppImage
-- Scripts de référence : [macos.sh](macos.sh) | [linux.sh](linux.sh) (PR bienvenus)
+### Paramètres de commande
+| Paramètre | Abréviation | Description | Exemple |
+|-----------|-------------|-------------|---------|
+| `--cursor-path` | `-C` | Chemin d'installation de Cursor (optionnel, auto-détection) | `/Applications/Cursor.app` |
+| `--scheme` | | Type de protocole (http/https) | `https` |
+| `--port` | `-p` | Port de service | `3000` |
+| `--suffix` | | Suffixe de domaine | `.local` |
+| `--skip-hosts` | | Ignorer la modification du fichier hosts | - |
+| `--save-command` | `-s` | Sauvegarder la commande dans un fichier | `modifier.cmd` |
+| `--confirm` | | Confirmer les modifications (ne pas restaurer si état identique) | - |
+| `--debug` | | Mode débogage | - |
+
+### Notes spécifiques aux plateformes
+- **Windows** : Exécution directe
+- **macOS** : Signature manuelle requise en raison du SIP (comme l'exécution directe si SIP est désactivé)
+  - Script de référence : [macos.sh](macos.sh)
+- **Linux** : Nécessite de gérer le format AppImage
+  - Script de référence : [linux.sh](linux.sh)
+
+Les contributions PR pour améliorer les scripts d'adaptation aux plateformes sont les bienvenues !
 
 ### 2. Configurer les Hosts
 Si vous utilisez le paramètre `--skip-hosts`, ajoutez manuellement ces enregistrements hosts :
@@ -39,86 +66,74 @@ Si vous utilisez le paramètre `--skip-hosts`, ajoutez manuellement ces enregist
 ## Détails de configuration
 Dans `config.toml`, commentez ou supprimez les paramètres inconnus, **NE les laissez PAS vides**.
 
-Lors de la migration depuis la version 0.1.x, générez un modèle de configuration en utilisant :
-```bash
-/path/to/ccursor /path/to/settings.json
-```
-
 ### Configuration de base
 | Élément | Description | Type | Requis | Par défaut | Version supportée |
 |---------|-------------|------|---------|------------|------------------|
 | `check-updates` | Vérifier les mises à jour au démarrage | bool | ❌ | false | 0.2.0+ |
 | `github-token` | Jeton d'accès GitHub | string | ❌ | "" | 0.2.0+ |
-| `usage-statistics` | Statistiques d'utilisation du modèle | bool | ❌ | true | 0.2.1+ |
-| `current-override` | Identifiant de substitution actif | string | ✅ | - | 0.2.0+ |
+| ~~`usage-statistics`~~ | ~~Statistiques d'utilisation du modèle~~ | ~~bool~~ | ❌ | true | 0.2.1-0.2.x, déprécié, implémentation future dans la base de données |
 
 ### Configuration du service (`service-config`)
 | Élément | Description | Type | Requis | Par défaut | Version supportée |
 |---------|-------------|------|---------|------------|------------------|
+| `tls` | Configuration du certificat TLS | object | ❌ | {cert_path="", key_path=""} | 0.3.0+ |
 | `port` | Port d'écoute du service | u16 | ✅ | - | Toutes versions |
-| `lock-updates` | Verrouiller les mises à jour | bool | ✅ | false | Toutes versions |
-| `domain-suffix` | Suffixe de domaine | string | ✅ | - | Toutes versions |
-| `proxy` | Configuration du serveur proxy | string | ❌ | "" | 0.2.0+ |
 | `dns-resolver` | Résolveur DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
-| `fake-email` | Configuration d'e-mail fictif | object | ❌ | {email="",sign-up-type="unknown",enable=false} | 0.2.0+ |
-| `service-addr` | Configuration d'adresse de service | object | ❌ | {mode="local",suffix=".example.com",port=8080} | 0.2.0+ |
+| `lock-updates` | Verrouiller les mises à jour | bool | ✅ | false | Toutes versions |
+| `fake-email` | Configuration d'e-mail fictif | object | ❌ | {email="", sign-up-type="unknown", enable=false} | 0.2.0+ |
+| `service-addr` | Configuration d'adresse de service | object | ❌ | {scheme="http", suffix="", port=0} | 0.2.0+ |
+| ~~`proxy`~~ | ~~Configuration du serveur proxy~~ | ~~string~~ | ❌ | - | 0.2.0-0.2.x, déprécié, migré vers `proxies._` |
 
-### Configuration des substitutions (`overrides`)
+### Configuration du pool de proxys (`proxies`) - Nouveau en 0.3.0
+| Élément | Description | Type | Requis | Par défaut |
+|---------|-------------|------|---------|------------|
+| `nom_clé` | Identifiant de configuration, correspond à `overrides.nom_clé` | string | ❌ | - |
+| `_` | Configuration proxy par défaut | string | ❌ | "" |
+
+### Configuration de mappage (`override-mapping`) - Nouveau en 0.3.0
+| Élément | Description | Type | Requis | Par défaut |
+|---------|-------------|------|---------|------------|
+| `Préfixe du jeton Bearer` | Correspondance avec le nom de configuration | string | ❌ | - |
+| `_` | Mappage par défaut | string | ❌ | - |
+
+### Configuration des substitutions (`overrides.nom_config`)
 | Élément | Description | Type | Requis | Par défaut | Version supportée |
 |---------|-------------|------|---------|------------|------------------|
 | `token` | Jeton d'authentification JWT | string | ❌ | - | Toutes versions |
 | `traceparent` | Préserver l'identifiant de trace | bool | ❌ | false | 0.2.0+ |
 | `client-key` | Hash de la clé client | string | ❌ | - | 0.2.0+ |
-| `checksum` | Somme de contrôle combinée | string | ❌ | - | 0.2.0+ |
+| `checksum` | Somme de contrôle combinée | object | ❌ | - | 0.2.0+ |
 | `client-version` | Numéro de version client | string | ❌ | - | 0.2.0+ |
+| `config-version` | Version de configuration (UUID) | string | ❌ | - | 0.3.0+ |
 | `timezone` | Identifiant de fuseau horaire IANA | string | ❌ | - | Toutes versions |
-| `ghost-mode` | Paramètres du mode privé | bool | ❌ | true | 0.2.0+ |
-| `session-id` | Identifiant unique de session | string | ❌ | - | 0.2.0+ |
+| `privacy-mode` | Paramètres du mode de confidentialité | bool | ❌ | true | 0.3.0+ |
+| `session-id` | Identifiant unique de session (UUID) | string | ❌ | - | 0.2.0+ |
+
+### Notes de migration de version
+#### 0.2.x → 0.3.0
+- **Changements majeurs** :
+  - Suppression de `current-override`, remplacé par le mappage dynamique des jetons Bearer
+  - Migration de `service-config.proxy` vers `proxies._`
+  - Ajout des nouvelles sections de configuration `proxies` et `override-mapping`
+  - `ghost-mode` renommé en `privacy-mode`, avec des fonctionnalités améliorées
+  - Ajout du nouveau champ `config-version`
+  - Ajout de la configuration `tls` pour le support HTTPS
+
+- **Relations de configuration** :
+  1. Le client envoie un jeton Bearer (par exemple, `sk-test123`)
+  2. `override-mapping` recherche le nom de configuration (par exemple, `sk-test` → `example`)
+  3. Utilise les paramètres de proxy de `proxies.example`
+  4. Utilise les configurations de substitution de `overrides.example`
 
 **Notes spéciales** :
-- Les éléments marqués "0.2.0+" n'étaient pas présents dans 0.1.x, mais les éléments marqués "Toutes versions" peuvent ne pas être complètement équivalents
-- Les éléments de configuration avec des valeurs par défaut peuvent être commentés ou supprimés pour éviter des problèmes potentiels
+- Une chaîne vide `""` signifie pas de proxy
+- La clé `_` est utilisée comme configuration par défaut/de repli
+- Il est recommandé de commenter les éléments de configuration optionnels pour éviter les problèmes potentiels
 
 ## Interfaces internes
-Les interfaces sous `/internal/` sont contrôlées par les fichiers du répertoire internal (renvoie index.html lorsque le fichier n'existe pas), à l'exception des interfaces spécifiques suivantes :
 
-### 1. TokenUpdate
-**Fonction** : Mise à jour du paramètre current-override pendant l'exécution
-**Paramètres** :
-| Paramètre | Requis | Description |
-|-----------|--------|-------------|
-| key | ✅ | Identifiant de configuration de substitution |
-
-**Exemple** :
-```bash
-curl http://127.0.0.1:3000/internal/TokenUpdate?key=${KEY_NAME}
-```
-
-### 2. TokenAdd
-**Fonction** : Obtenir l'URL d'autorisation et le temps d'attente
-**Retourne** : `["url",100]`, où url est le lien d'autorisation et 100 est le temps d'attente en secondes
-
-**Paramètres** :
-| Paramètre | Requis | Description |
-|-----------|--------|-------------|
-| timezone | ✅ | Identifiant de fuseau horaire IANA (par exemple, "Asia/Shanghai" ou "America/Los_Angeles") |
-| wait | ❌ | Temps d'attente en secondes, par défaut 100 |
-| client_version | ❌ | Numéro de version client, par défaut 0.49.6 |
-
-**Exemple** :
-```bash
-# Utilisation de base
-curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai
-
-# Temps d'attente personnalisé
-curl http://127.0.0.1:3000/internal/TokenAdd?timezone=Asia%2FShanghai&wait=50
-```
-
-### 3. ConfigUpdate
+### ConfigUpdate
 **Fonction** : Déclencher le rechargement du service après la mise à jour du fichier de configuration
-
-### 4. GetUsage
-**Fonction** : Obtenir les statistiques d'utilisation du modèle
 
 ---
 
