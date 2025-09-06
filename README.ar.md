@@ -6,30 +6,110 @@
 أداة وكيل عكسي محلية. المقدمة موجزة، عن قصد.
 
 ## التثبيت
-1. قم بتنزيل modifier و ccursor من https://github.com/[NAME]/cursor-rp/releases
+1. قم بزيارة https://github.com/[NAME]/cursor-rp/releases لتنزيل dbwriter و modifier و ccursor
 2. أعد تسميتهما بالأسماء القياسية وضعهما في نفس الدليل
 
 ## الإعداد والاستخدام
 
-### 1. تصحيح Cursor
-1. افتح Cursor، نفذ الأمر `Open User Settings` وسجل مسار ملف الإعدادات
-2. أغلق Cursor، طبق التصحيح (يجب إعادة التنفيذ بعد كل تحديث):
-   ```bash
-   # الاستخدام الأساسي (الكشف التلقائي عن مسار Cursor)
-   /path/to/modifier --port 3000 --suffix .local
- 
-   # تحديد مسار Cursor
-   /path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local
- 
-   # إعدادات HTTPS
-   /path/to/modifier --scheme https --port 443 --suffix .example.com
- 
-   # تخطي اكتشاف ملف hosts (إدارة hosts يدويًا)
-   /path/to/modifier --port 3000 --suffix .local --skip-hosts
- 
-   # حفظ الأمر لإعادة الاستخدام
-   /path/to/modifier --port 3000 --suffix .local --save-command modifier.cmd
-   ```
+### 1. إدارة الحسابات (dbwriter)
+dbwriter هي أداة إدارة حسابات لتبديل معلومات حساب Cursor بسرعة. تدعم التطبيق المباشر، وإدارة مجموعة الحسابات، وأوضاع أخرى متعددة.
+
+#### الاستخدام الأساسي
+```bash
+# التطبيق المباشر (بدون حفظ)
+dbwriter apply -a <TOKEN> -m pro -s google
+dbwriter apply -a <ACCESS_TOKEN> -r <REFRESH_TOKEN> -e user@example.com -m pro_plus -s auth0
+
+# حفظ الحساب في المجموعة
+dbwriter save -a <TOKEN> -e user@example.com -m pro -s google
+dbwriter save -a <TOKEN> -e user@example.com -m free_trial -s github --apply  # حفظ وتطبيق فوراً
+
+# تبديل الحساب من المجموعة
+dbwriter use -e user@example.com              # الاختيار بواسطة البريد الإلكتروني
+dbwriter use -m pro                           # اختيار حساب Pro (الأول إذا كان هناك أكثر من واحد)
+dbwriter use --interactive                    # اختيار تفاعلي
+
+# عرض مجموعة الحسابات
+dbwriter list                                 # سرد جميع الحسابات
+dbwriter list -m pro                          # سرد نوع عضوية محدد
+dbwriter list --verbose                       # عرض معلومات مفصلة (بما في ذلك معاينة الرمز)
+
+# إدارة مجموعة الحسابات
+dbwriter manage remove user@example.com       # إزالة حساب
+dbwriter manage disable user@example.com      # تعطيل حساب (حذف ناعم)
+dbwriter manage stats                         # عرض الإحصائيات
+```
+
+#### وصف معلمات الأمر
+
+**المعلمات العامة**
+| المعلمة | الوصف | القيمة الافتراضية |
+|---------|-------|-------------------|
+| `--pool-db` | مسار قاعدة بيانات مجموعة الحسابات | `./accounts.db` |
+
+**الأمر الفرعي: apply (التطبيق المباشر)**
+| المعلمة | الاختصار | الوصف | مطلوب |
+|---------|----------|-------|-------|
+| `--access-token` | `-a` | رمز الوصول | ✅ |
+| `--refresh-token` | `-r` | رمز التحديث (افتراضيًا مثل access) | ❌ |
+| `--email` | `-e` | البريد الإلكتروني للحساب | ❌ |
+| `--membership` | `-m` | نوع العضوية | ✅ |
+| `--signup-type` | `-s` | طريقة التسجيل | ✅ |
+
+**الأمر الفرعي: save (حفظ في مجموعة الحسابات)**
+| المعلمة | الاختصار | الوصف | مطلوب |
+|---------|----------|-------|-------|
+| `--access-token` | `-a` | رمز الوصول | ✅ |
+| `--refresh-token` | `-r` | رمز التحديث | ❌ |
+| `--email` | `-e` | البريد الإلكتروني للحساب (موصى به) | ❌ |
+| `--membership` | `-m` | نوع العضوية | ✅ |
+| `--signup-type` | `-s` | طريقة التسجيل | ✅ |
+| `--apply` |  | تطبيق فوراً بعد الحفظ | ❌ |
+
+**الأمر الفرعي: use (استخدام من مجموعة الحسابات)**
+| المعلمة | الاختصار | الوصف | حصري متبادل |
+|---------|----------|-------|-------------|
+| `--email` | `-e` | اختيار عن طريق البريد الإلكتروني | مع `-m` |
+| `--membership` | `-m` | اختيار عن طريق نوع العضوية | مع `-e` |
+| `--interactive` | `-i` | اختيار تفاعلي | ❌ |
+
+**أنواع القيم المدعومة**
+- **أنواع العضوية**: `free`, `pro`, `pro_plus`, `enterprise`, `free_trial`, `ultra`
+- **طرق التسجيل**: `unknown`, `auth0`, `google`, `github`
+
+#### سيناريوهات الاستخدام
+1. **التبديل المؤقت**: استخدم أمر `apply` لتطبيق حساب مباشرة دون حفظه محلياً
+2. **مجموعة الحسابات**: استخدم أمر `save` لبناء مجموعة حسابات لتسهيل إدارة حسابات متعددة
+3. **التبديل السريع**: استخدم أمر `use` للتبديل السريع بين الحسابات المحفوظة
+4. **الإدارة الجماعية**: إدارة جميع معلومات الحسابات من خلال مجموعة الحسابات
+
+#### ملاحظات
+- يدعم الرمز وضعين: رموز وصول/تحديث متطابقة، أو رموز مختلفة
+- يتم حفظ قاعدة بيانات مجموعة الحسابات افتراضياً في `./accounts.db`، يمكن تحديدها عبر `--pool-db`
+- يُوصى بتعيين بريد إلكتروني لكل حساب لتسهيل التعرف عليه وإدارته
+- عند استخدام `--verbose` لعرض معلومات مفصلة، يتم عرض أول 20 حرفاً فقط من الرموز
+
+### 2. تصحيح Cursor (modifier)
+أغلق Cursor، طبق التصحيح (يجب إعادة التنفيذ بعد كل تحديث):
+```bash
+# الاستخدام الأساسي (الكشف التلقائي عن مسار Cursor)
+/path/to/modifier --port 3000 --suffix .local
+
+# تحديد مسار Cursor
+/path/to/modifier --cursor-path /path/to/cursor --port 3000 --suffix .local
+
+# إعدادات HTTPS
+/path/to/modifier --scheme https --port 443 --suffix .example.com
+
+# تخطي اكتشاف ملف hosts (إدارة hosts يدويًا)
+/path/to/modifier --port 3000 --suffix .local --skip-hosts
+
+# حفظ الأمر لإعادة الاستخدام
+/path/to/modifier --port 3000 --suffix .local --save-command modifier.cmd
+
+# مثال كامل
+/path/to/modifier -C /path/to/cursor --scheme https -p 3000 --suffix .local --skip-hosts -s modifier.cmd --confirm --pass-token
+```
 
 ### معلمات الأمر
 | المعلمة | الاختصار | الوصف | مثال |
@@ -41,6 +121,7 @@
 | `--skip-hosts` | | تخطي تعديل ملف hosts | - |
 | `--save-command` | `-s` | حفظ الأمر في ملف | `modifier.cmd` |
 | `--confirm` | | تأكيد التغييرات (عدم الاستعادة إذا كانت الحالة متطابقة) | - |
+| `--pass-token` | | تجاوز التحقق من الرمز (موصى به) | - |
 | `--debug` | | وضع التصحيح | - |
 
 ### ملاحظات خاصة بالمنصات
@@ -52,16 +133,18 @@
 
 مرحب بمساهمات PR لتحسين نصوص تكييف المنصات!
 
-### 2. إعداد Hosts
+### 3. إعداد Hosts
 إذا كنت تستخدم المعلمة `--skip-hosts`، أضف يدويًا سجلات المضيفين هذه:
 ```
 127.0.0.1 api2.cursor.sh.local api3.cursor.sh.local repo42.cursor.sh.local api4.cursor.sh.local us-asia.gcpp.cursor.sh.local us-eu.gcpp.cursor.sh.local us-only.gcpp.cursor.sh.local
 ```
 
-### 3. بدء الخدمة
+### 4. بدء الخدمة
 ```bash
 /path/to/ccursor
 ```
+
+بالنسبة لمطوري امتدادات أو إضافات بيئة التطوير المتكاملة، أضف المعلمة `--debug` بعد بدء ccursor لمشاهدة السجلات المفصلة.
 
 ## تفاصيل الإعداد
 في `config.toml`، قم بتعليق أو حذف المعلمات غير المعروفة، **لا تتركها فارغة**.
@@ -76,7 +159,8 @@
 ### إعداد الخدمة (`service-config`)
 | العنصر | الوصف | النوع | مطلوب | القيمة الافتراضية | الإصدار المدعوم |
 |--------|--------|-------|--------|-------------------|-----------------|
-| `tls` | إعداد شهادة TLS | object | ❌ | {cert_path="", key_path=""} | 0.3.0+ |
+| `tls` | إعداد شهادة TLS | object | ✅ | {cert_path="", key_path=""} | 0.3.0+ |
+| `ip-addr` | عنوان IP استماع الخدمة | object | ✅ | {ipv4="", ipv6=""} | 0.3.1+ |
 | `port` | منفذ استماع الخدمة | u16 | ✅ | - | جميع الإصدارات |
 | `dns-resolver` | محلل DNS (gai/hickory) | string | ❌ | "gai" | 0.2.0+ |
 | `lock-updates` | قفل التحديثات | bool | ✅ | false | جميع الإصدارات |
@@ -129,11 +213,13 @@
 - السلسلة الفارغة `""` تعني عدم استخدام وكيل
 - يستخدم المفتاح `_` كإعداد افتراضي/احتياطي
 - يُوصى بتعليق عناصر الإعداد الاختيارية لتجنب المشكلات المحتملة
+- سيتم دائمًا تحديث ملف التكوين عند إغلاق ccursor. إذا كنت بحاجة إلى تعديل ملف التكوين، يرجى اختيار GET /internal/ConfigUpdate أو الإغلاق ثم التحديث
 
 ## الواجهات الداخلية
 
 ### ConfigUpdate
 **الوظيفة**: تفعيل إعادة تحميل الخدمة بعد تحديث ملف الإعداد
+**القيود**: لا يمكن تشغيلها عبر الوصول بالنطاق، تتطلب وصولاً خارجيًا مع وكيل عكسي مخصص
 
 ---
 

@@ -423,7 +423,7 @@ process_app() {
     modifier_cmd="${modifier_cmd} --cursor-path ${BASE_PATH}/Contents/Resources/app"
     modifier_cmd="${modifier_cmd} --scheme https"
     modifier_cmd="${modifier_cmd} --suffix ${SUFFIX}"
-    modifier_cmd="${modifier_cmd} --confirm"
+    modifier_cmd="${modifier_cmd} --confirm --pass-token"
 
     if [ -n "${PORT}" ]; then
       modifier_cmd="${modifier_cmd} --port ${PORT}"

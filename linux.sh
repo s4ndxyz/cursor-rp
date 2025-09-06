@@ -440,7 +440,7 @@ process_appimage() {
     modifier_cmd="${modifier_cmd} --cursor-path ${TEMP_DIR}/squashfs-root/usr/share/cursor/resources/app"
     modifier_cmd="${modifier_cmd} --scheme https"
     modifier_cmd="${modifier_cmd} --suffix ${SUFFIX}"
-    modifier_cmd="${modifier_cmd} --confirm"
+    modifier_cmd="${modifier_cmd} --confirm --pass-token"
 
     if [ -n "${PORT}" ]; then
       modifier_cmd="${modifier_cmd} --port ${PORT}"
